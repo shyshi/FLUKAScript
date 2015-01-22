@@ -11,7 +11,7 @@ namespace FLUKAScript
     {
         static void Main(string[] args)
         {
-
+            Console.WriteLine("Hello, World!");
         }
     }
 }
