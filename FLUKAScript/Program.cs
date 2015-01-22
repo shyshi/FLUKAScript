@@ -11,8 +11,7 @@ namespace FLUKAScript
 {
     class Program
     {
-        string name = "";
-        int CheckStart(string cardName)//检查以cardName开头的行数并记录
+        static int CheckStart(string cardName)//检查以cardName开头的行数并记录
         {
             int count = 0;
             string line;
@@ -29,13 +28,13 @@ namespace FLUKAScript
             return count;
         }
 
-        void CreateTempInputFiles(int i)
+        static void CreateTempInputFiles(string name, int i)
         {
             FileStream inputFile = new FileStream("input.inp", FileMode.Open);
             StreamReader srinputFile = new StreamReader(inputFile);
             string tempInputFileName = name + i.ToString() + ".inp";
-            FileStream tempInputFile = new FileStream(tempInputFileName, FileMode.Create);
-            StreamWriter srtempInputFile = new StreamWriter(tempInputFileName);
+            FileStream tempInputFile = new FileStream(tempInputFileName, FileMode.OpenOrCreate);
+            StreamWriter srtempInputFile = new StreamWriter(tempInputFile);
             string inputFileLine = srinputFile.ReadLine();
             string number="";
             number=i.ToString()+i.ToString()+i.ToString()+i.ToString()+i.ToString()+i.ToString();
@@ -48,9 +47,14 @@ namespace FLUKAScript
             srinputFile.Close();
             srtempInputFile.Close();
         }
+        
         static void Main(string[] args)
         {
+            string name="";
             Console.WriteLine("Hello, World!");
+            Console.Write("Please input the project name:");
+            name = Console.ReadLine();
+            CreateTempInputFiles(name, 3);
         }
     }
 }
