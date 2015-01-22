@@ -28,7 +28,7 @@ namespace FLUKAScript
             return count;
         }
 
-        static void CreateTempInputFiles(string name, int i)
+        static string CreateTempInputFiles(string name, int i)//创建临时输入文件以供多次运行
         {
             FileStream inputFile = new FileStream("input.inp", FileMode.Open);
             StreamReader srinputFile = new StreamReader(inputFile);
@@ -46,6 +46,35 @@ namespace FLUKAScript
             }
             srinputFile.Close();
             srtempInputFile.Close();
+            return tempInputFileName;
+        }
+
+        static void CreateRunScript(string name)//创建运行脚本
+        {
+            FileStream runScript = new FileStream("run.sh", FileMode.Create);
+            StreamWriter srrunScript = new StreamWriter(runScript);
+            string line = "#!/bin/bash";
+            srrunScript.WriteLine(line);
+            srrunScript.WriteLine();
+            string tempInputFileName = "";
+            int timesOfRun = 1;
+            Console.Write("Please input the time you want to run your input files(1-10):");
+            timesOfRun=Convert.ToInt16(Console.ReadLine());
+            int source = CheckStart("SOURCE");
+            string sourceName = "";
+            if (source > 0)
+            {
+                Console.Write("Please input the source file name:");
+                sourceName = Console.ReadLine();
+                sourceName = "-e " + sourceName + " ";
+            }
+            for (int i=0;i<timesOfRun;i++)
+            {
+                tempInputFileName = CreateTempInputFiles(name, i);
+                srrunScript.WriteLine("$FLUPRO/flutil/rfluka " + sourceName + "-N0 -M5 " + tempInputFileName);
+            }
+            //System.Diagnostics.Process.Start("chmod u+x run.sh");
+            srrunScript.Close();
         }
         
         static void Main(string[] args)
@@ -54,7 +83,7 @@ namespace FLUKAScript
             Console.WriteLine("Hello, World!");
             Console.Write("Please input the project name:");
             name = Console.ReadLine();
-            CreateTempInputFiles(name, 3);
+            CreateRunScript(name);
         }
     }
 }
