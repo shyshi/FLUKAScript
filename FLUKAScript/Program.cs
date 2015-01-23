@@ -71,16 +71,17 @@ namespace FLUKAScript
             for (int i = 0; i < timesOfRun; i++)
             {
                 tempInputFileName = CreateTempInputFiles(name, i);
-                srrunScript.WriteLine("$FLUPRO/flutil/rfluka " + sourceName + "-N0 -M5 " + tempInputFileName);
+                srrunScript.WriteLine("$FLUPRO/flutil/rfluka " + sourceName + "-N0 -M5 " + tempInputFileName + " >> run" + i.ToString()+".log");
             }
-            //System.Diagnostics.Process.Start("chmod u+x run.sh");
             srrunScript.Close();
         }
 
-        //static void execute()
-        //{
-        //    System.Diagnostics.Process.Start("./run.sh");
-        //}
+        static void execute(string scriptName)
+        {
+            //System.Diagnostics.Process.Start("chmod u+x "+scriptName);
+            //System.Diagnostics.Process.Start("./"+scriptName);
+            Console.WriteLine("Succeed!");
+        }
 
         //static string GetNumbers(string card)//获得数据卡片对应的编号信息
         //{
@@ -115,20 +116,78 @@ namespace FLUKAScript
         //    return numbers;
         //}
 
-        static void DealWithUSRBIN(string number)//对USRBIN卡进行数据处理，参数为USRBIN卡1的WHAT(3)，即计算输出文件的后缀
+        static void WriteFileNames(StreamWriter srexecuteFile,string number)//遍历目录，找出对应卡片的数据文件并写入处理脚本
         {
+            string dirName = System.Environment.CurrentDirectory;
+            DirectoryInfo DIR = new DirectoryInfo(dirName);
+            string[] fileNames = new string[20];
+            int count = 0;
+            foreach (FileInfo files in DIR.GetFiles("*." + number))
+            {
+                fileNames[count] = files.Name;
+                count++;
+            }
+            for (int i = 0; i < count; i++)
+            {
+                srexecuteFile.WriteLine(fileNames[i]);
+            }
+        }
 
+        static void DealWithUSRCards(string name,string cardsName,string number)//对USRBIN卡进行数据处理，参数为USRBIN卡1的WHAT(3)，即计算输出文件的后缀
+        {
+            string[] usrcardsName=new string[2];
+            string[] usrcardsTempFileName = new string[2];
+            switch (cardsName)
+            {
+                case "USRBIN":
+                    usrcardsName[0] = "usbsuw";
+                    usrcardsName[1] = "usbrea";
+                    usrcardsTempFileName[0] = name + number + "temp";
+                    usrcardsTempFileName[1] = name + number + ".usrbin";
+                    break;
+                case "USRTRACK":
+                    usrcardsName[0] = "ustsuw";
+                    usrcardsName[1] = "";
+                    usrcardsTempFileName[0] = name + "FL" + number;
+                    usrcardsTempFileName[1] = "";
+                    break;
+            }
+            FileStream executeFile=new FileStream("execute"+usrcardsName[0],FileMode.Create);
+            StreamWriter srexecuteFile = new StreamWriter(executeFile);
+            srexecuteFile.WriteLine("#!/bin/bash");
+            srexecuteFile.WriteLine();
+            srexecuteFile.WriteLine("$FLUPRO/flutil/"+usrcardsName[0]+" <<EOF");
+            WriteFileNames(srexecuteFile, number);
+            srexecuteFile.WriteLine();
+            srexecuteFile.WriteLine(usrcardsTempFileName[0]);
+            srexecuteFile.WriteLine("EOF");
+            srexecuteFile.Close();
+            execute(executeFile.Name);
+            if (usrcardsName[1]!="")
+            {
+                FileStream executeFile2 = new FileStream("execute" + usrcardsName[1], FileMode.Create);
+                StreamWriter srexecuteFile2 = new StreamWriter(executeFile2);
+                srexecuteFile2.WriteLine("#!/bin/bash");
+                srexecuteFile2.WriteLine();
+                srexecuteFile2.WriteLine("$FLUPRO/flutil/" + usrcardsName[1] + " <<EOF");
+                srexecuteFile2.WriteLine(usrcardsTempFileName[0]);
+                srexecuteFile2.WriteLine(usrcardsTempFileName[1]);
+                srexecuteFile2.WriteLine("EOF");
+                srexecuteFile2.Close();
+                execute(executeFile2.Name);
+            }
         }
         
         static void Main(string[] args)
         {
-            //string name="";
+            string name = "";
             Console.WriteLine("Hello, World!");
-            //Console.Write("Please input the project name:");
-            //name = Console.ReadLine();
+            Console.Write("Please input the project name:");
+            name = Console.ReadLine();
             //CreateRunScript(name);
             //Console.WriteLine(GetNumbers("USRBIN"));
-            //Console.ReadKey();            
+            //Console.ReadKey();         
+            DealWithUSRCards(name, "USRBIN", "50");
         }
     }
 }
