@@ -133,7 +133,7 @@ namespace FLUKAScript
             }
         }
 
-        static void DealWithUSRCards(string name,string cardsName,string number)//对USRBIN卡进行数据处理，参数为USRBIN卡1的WHAT(3)，即计算输出文件的后缀
+        static void DealWithUSRCards(string name,string cardsName,string number)//对USR*卡进行数据处理，参数为工程的用户命名、USR卡的名称和USR*卡1的WHAT(3)-计算输出文件的后缀
         {
             string[] usrcardsName=new string[2];
             string[] usrcardsTempFileName = new string[2];
@@ -178,6 +178,30 @@ namespace FLUKAScript
             }
         }
         
+        static bool CheckFinish(string name)
+        {
+            string dirName = System.Environment.CurrentDirectory;
+            DirectoryInfo DIR = new DirectoryInfo(dirName);
+            bool Finished = false;
+            string line = "";
+            FileStream logFile;
+            StreamReader srlogFile;
+            foreach (FileInfo files in DIR.GetFiles(name+"*.log"))
+            {
+                logFile = new FileStream(files.Name, FileMode.Open);
+                srlogFile = new StreamReader(logFile);
+                line = srlogFile.ReadLine();
+                while (line!=null)
+                {
+                    if (line.StartsWith("End of FLUKA run"))
+                    {
+                        Finished=true;
+                    }
+                }
+            }
+            return Finished;
+        }
+
         static void Main(string[] args)
         {
             string name = "";
@@ -187,7 +211,14 @@ namespace FLUKAScript
             //CreateRunScript(name);
             //Console.WriteLine(GetNumbers("USRBIN"));
             //Console.ReadKey();         
-            DealWithUSRCards(name, "USRBIN", "50");
+            if (CheckFinish(name))
+            { 
+                DealWithUSRCards(name, "USRBIN", "50"); 
+            }
+            else
+            {
+                Console.WriteLine("Run Finished abnormal, Please Check the log and run again.");
+            }
         }
     }
 }
