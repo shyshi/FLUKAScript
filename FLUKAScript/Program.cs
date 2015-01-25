@@ -83,38 +83,40 @@ namespace FLUKAScript
             Console.WriteLine("Succeed!");
         }
 
-        //static string GetNumbers(string card)//获得数据卡片对应的编号信息
-        //{
-        //    int count = 0;
-        //    string numbers = "Lal";
-        //    int i = 0;
-        //    FileStream inputFile = new FileStream("input.inp", FileMode.Open);
-        //    StreamReader sr = new StreamReader(inputFile);
-        //    string line;
-        //    string sPattern = @"USR";
-        //    Regex newRegex = new Regex(sPattern);
-        //    string[] cardLines = new string[20];
-        //    line = sr.ReadLine();
-        //    while (line != null)
-        //    {
-        //        if (line.StartsWith(card))
-        //        {
-        //            cardLines[i] = line;
-        //            line = sr.ReadLine();
-        //            count += 1;
-        //        }
-        //    }
-        //    for (i = 0; i < count;i=i+2)
-        //    {
-        //        if (newRegex.IsMatch(cardLines[i]))
-        //        {
-        //            //numbers += cardLines[i].Substring(m.Index, 2);
-        //            Console.WriteLine("Success");
-        //        }
-        //    }    
-        //    sr.Close();
-        //    return numbers;
-        //}
+        static string GetNumbers(string card)//获得数据卡片对应的编号信息
+        {
+            int count = 0;
+            string numbers = "Lal";
+            int i = 0;
+            FileStream inputFile = new FileStream("input.inp", FileMode.Open);
+            StreamReader sr = new StreamReader(inputFile);
+            string line;
+            string sPattern = @"-\d\d.";
+            Regex newRegex = new Regex(sPattern);
+            string[] cardLines = new string[20];
+            line = sr.ReadLine();
+            while (line != null)
+            {
+                if (line.StartsWith(card))
+                {
+                    cardLines[i] = line;
+                    line = sr.ReadLine();
+                    count += 1;
+                }
+                line = sr.ReadLine();
+            }
+            for (i = 0; i < count; i = i + 2)
+            {
+                if (newRegex.IsMatch(cardLines[i]))
+                {
+                    Match m = Regex.Match(cardLines[i], sPattern);
+                    numbers += cardLines[i].Substring(m.Index+1, 2);
+                    Console.WriteLine("Success "+numbers);
+                }
+            }
+            sr.Close();
+            return numbers;
+        }
 
         static void WriteFileNames(StreamWriter srexecuteFile,string number)//遍历目录，找出对应卡片的数据文件并写入处理脚本
         {
@@ -193,15 +195,36 @@ namespace FLUKAScript
                 line = srlogFile.ReadLine();
                 while (line!=null)
                 {
-                    if (line.StartsWith("End of FLUKA run"))
+                    if (line.StartsWith("End"))
                     {
                         Finished=true;
                     }
+                    line = srlogFile.ReadLine();
                 }
             }
             return Finished;
         }
 
+        static void AfterRun()
+        {
+            FileStream countFile = new FileStream("count", FileMode.OpenOrCreate);
+            StreamReader srcountFile = new StreamReader(countFile);
+            int count;
+            string path;
+            count = Convert.ToInt32(srcountFile.ReadLine());
+            srcountFile.Close();
+            count++;
+            StreamWriter swcountFile = new StreamWriter(countFile);
+            swcountFile.WriteLine(count.ToString());
+            swcountFile.Close();
+            path = "Datas/" + count.ToString();
+            //System.Diagnostics.Process.Start("mkdir " + path);
+            //System.Diagnostics.Process.Start("mv *.50 *.48 *.49 *.out *.usrbin " + path + "/");
+            //System.Diagnostics.Process.Start("cp input.inp " + path + "/");
+            //System.Diagnostics.Process.Start("rm -rf ran*");
+            //System.Diagnostics.Process.Start("zip " + path + ".zip " + path + "/*");
+        }
+        
         static void Main(string[] args)
         {
             string name = "";
@@ -212,8 +235,12 @@ namespace FLUKAScript
             //Console.WriteLine(GetNumbers("USRBIN"));
             //Console.ReadKey();         
             if (CheckFinish(name))
-            { 
-                DealWithUSRCards(name, "USRBIN", "50"); 
+            {
+                //DealWithUSRCards(name, "USRBIN", "50");
+                //AfterRun();
+                //GetNumbers("USRBIN");
+                Console.WriteLine("Finished");
+                Console.ReadKey();
             }
             else
             {
