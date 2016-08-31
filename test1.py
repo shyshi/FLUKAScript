@@ -28,7 +28,7 @@ def makeusrfiles(usrcard,cardtype):
                         print(temp_split)
                         detectornames.append(temp_split)
                         usrcardsindexline=temp.split()
-                        index=usrcardsindexline[3][1:len(usrcardsindexline[3])-2]
+                        index=usrcardsindexline[3][1:len(usrcardsindexline[3])-1]
                         index_of_usrcards.append("."+index)
                 print(detectornames)
                 detectornames.remove("a")
@@ -78,7 +78,9 @@ def makeusrfiles(usrcard,cardtype):
 
 def afterrun():
         os.system("rm -rf US*")
-        os.systen("rm -rf ran*")
+        os.system("rm -rf ran*")
+        finishcommand="echo \""+name+" is Finished.\" | mail -s \"Mission Complete\" shihy@ihep.ac.cn"
+        os.system(finishcommand)
 
 name=raw_input("Please make sure that you run the fluka script in screen shell.\n Please input the file name you want:")
 execute()
