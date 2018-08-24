@@ -1,3 +1,5 @@
+#!/usr/bin/python2.7
+
 import os
 import random
 
@@ -162,7 +164,7 @@ def makeusrfiles(usrcard,cardtype,inputfile):
                                 tempfile.write("#!/bin/bash\n")
                                 tempfile.write("\n")
                                 tempfile.write("$FLUPRO/flutil/usbrea <<EOF\n")
-                                tempfile.write(detectorname+"\n")
+                                tempfile.write(detectorname+".bnn\n")
                                 tempfile.write(detectorname+".usrbin\n")
                                 tempfile.write("EOF")
                                 tempfile.close()
@@ -179,8 +181,6 @@ def afterrun(inputfile):
         prefix=inputfile.rstrip(".inp")
         os.system("rm -rf "+prefix+"*")
         os.system("mv input.inp "+inputfile)
-        finishcommand="echo \""+name+" is Finished.\" | mail -s \"Mission Complete\" shihy@ihep.ac.cn"
-        os.system(finishcommand)
 
 inputfile=findfile()
 name=raw_input("Please input the name you want:\n")
